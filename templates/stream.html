@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<form>
+    <img src="{{ url_for('video_feed') }}", width="1080", height="720">
+
+    <style>
+
+       .layer {
+        overflow: auto; /* Добавляем полосы прокрутки */
+        width: 300px; /* Ширина блока */
+        height: 450px; /* Высота блока */
+        padding: 5px; /* Поля вокруг текста */
+        border: solid 2px black; /* Параметры рамки */
+        border-radius: 3%;
+        display:inline-block;
+           text-align: left;
+       }
+      </style>
+        <div class="layer" id="ty" ></div>
+        <div id="er">
+        <form action="" method="POST">
+          <input type="text" class="message" placeholder="Messages"/>
+          <input type="submit"/>
+        </form>
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+             <script type="text/javascript" {{ url_for('static', filename='app.js')}}></script>
+             <script type="text/javascript">
+                myVar = myFunc({{data.userName|tojson}})
+             </script>
+        <script type="text/javascript">
+          var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+          socket.on( 'connect', function() {
+            socket.emit( 'my event', {
+              data: 'User Connected'
+            } )
+
+            var form = $( 'form' ).on( 'submit', function( e ) {
+              e.preventDefault()
+              {#let user_name = '{{ data.username }}'#}
+              let user_input = $( 'input.message' ).val()
+              socket.emit( 'my event', {
+                user_name : {{ data.userName|tojson }},
+                message : user_input
+              } )
+              $( 'input.message' ).val( '' )
+            } )
+          } )
+          socket.on( 'my response', function( msg ) {
+            console.log( msg )
+            if(( typeof msg.user_name !== 'undefined' )&(msg.message!=='')) {
+              $( 'h3' ).remove()
+              $( 'div.layer' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
+                document.getElementById('ty').scrollTop = document.getElementById('ty').scrollHeight;
+            }
+          })
+
+        </script>
+
+    </div>
+
+</form>
+
+<audio controls autoplay>
+        <source src="{{ url_for('audio') }}" type="audio/x-wav;codec=pcm">
+        Your browser does not support the audio element.
+</audio>
+
+<body style="text-align: center">
+    <form method="post" action="press_button">
+        <input type="submit" value="Закончить трансляцию" style="padding: 20px" >
+    </form>
+</body>
+</html>
